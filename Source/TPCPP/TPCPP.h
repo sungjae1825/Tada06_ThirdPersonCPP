@@ -1,6 +1,6 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
 
+#define CheckNull(p) { if (p == nullptr) return; }
+#define CheckNullResult(p, result) { if (p == nullptr) return result; }
