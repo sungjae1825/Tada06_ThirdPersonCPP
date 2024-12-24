@@ -3,6 +3,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CAttributeComponent.h"
+#include "Components/COptionComponent.h"
 
 ACPlayer::ACPlayer()
 {
@@ -38,6 +39,7 @@ ACPlayer::ACPlayer()
 
 	//-> My Comp
 	AttributeComp = CreateDefaultSubobject<UCAttributeComponent>("AttributeComp");
+	OptionComp = CreateDefaultSubobject<UCOptionComponent>("OptionComp");
 
 	//-> Component Settings
 	GetCharacterMovement()->MaxWalkSpeed = AttributeComp->GetSprintSpeed();
@@ -59,16 +61,15 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	//Axis Event
 	PlayerInputComponent->BindAxis("MoveForward", this, &ACPlayer::OnMoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACPlayer::OnMoveRight);
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-
+	PlayerInputComponent->BindAxis("Turn", this, &ACPlayer::OnTurn);
+	PlayerInputComponent->BindAxis("LookUp", this, &ACPlayer::OnLookUp);
 
 	//Action Event
 	PlayerInputComponent->BindAction("Walk", IE_Pressed, this, &ACPlayer::OnWalk);
 	PlayerInputComponent->BindAction("Walk", IE_Released, this, &ACPlayer::OffWalk);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACPlayer::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACPlayer::StopJumping);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 }
 
 void ACPlayer::OnMoveForward(float Axis)
@@ -91,12 +92,18 @@ void ACPlayer::OnMoveRight(float Axis)
 	AddMovementInput(Direction, Axis);
 }
 
-void ACPlayer::OnTrun(float Axis)
+void ACPlayer::OnTurn(float Axis)
 {
+	float Rate = OptionComp->GetMouseXSpeed();
+
+	AddControllerYawInput(Axis * Rate * GetWorld()->GetDeltaSeconds());
 }
 
 void ACPlayer::OnLookUp(float Axis)
 {
+	float Rate = OptionComp->GetMouseYSpeed();
+
+	AddControllerPitchInput(Axis * Rate * GetWorld()->GetDeltaSeconds());
 }
 
 void ACPlayer::OnWalk()
